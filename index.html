@@ -1,0 +1,111 @@
+<!DOCTYPE html> <html>
+<head>
+	<title>MediaCell</title>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
+	<style>
+		html, body {margin:0; padding:0; overflow:hidden;} 
+	</style>
+	<link href="https://fonts.googleapis.com/css?family=Noto+Serif+KR&display=swap" rel="stylesheet">
+	<link rel="stylesheet" type="text/css" href="css/style.css">
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/mathjs/10.0.0/math.min.js"></script>
+	<link rel="shortcut icon" href="#">
+</head>
+<body>
+	<noscript>
+		<div class="container" style="background-color: #000000;">
+			<p>이 페이지는 javascript를 이용하고 있습니다. 브라우저 설정에서 javascript를 활성화한 뒤 새로고침해주세요.</p>
+			<p>This page uses javascript. Please enable javascript in your browser settings and reflesh the page.</p>
+		</div>
+	</noscript>
+
+	<canvas id="c"></canvas>
+	<main style="transform: translateX(0%)">
+		<div id="intro">
+			<div class="textWrapper">
+				<p class="title black">MediaCell</p>
+				<p class="description_ko black">
+					미디어가 발전하면 발전할수록, 사람들은 물리적인 장벽을 뚫고 서로와 교감할 수 있게 되었지만, 그 실체는 피상적으로 교류할 수밖에 없는, 극심한 분단된 자아를 보여주게 된다. 미디어의 발전에 따라 껍질을 두르고 자유롭게 교감하는 것처럼 보이지만, 진짜 자아를 숨겨버린 사람들의 내면을 미디어셀이라는 이름의 가공의 생명체로 형상화하였다.
+				</p>
+				<p class="description_en black">
+					As media develops, people are able to communicate with each other through physical barriers, but the reality shows an extremely divided self that has no choice but to interact superficially. With the development of the media, it seems to be surrounded and freely communicated, but the inner sides of people who hid their real selves are embodied as processed creatures named MediaCell.
+				</p>
+			</div>
+			<div class="nextButton black" style="margin-top:50px"></div>
+		</div>
+		<div id="scene1">
+			<div class="horizWrapper">
+				<div class="canvasWrapper">
+					<div id="canvas1"></div>
+				</div>
+				<div class="textWrapper_short desc_in_main">
+					<p class="smallTitle">I</p>
+					<p class="title">Stimulus</p>
+					<p class="description_ko">
+						미디어가 발전하면 발전할수록, 사람들은 물리적인 장벽을 뚫고 서로와 교감할 수 있게 되었지만, 그 실체는 피상적으로 교류할 수밖에 없는, 극심한 분단된 자아를 보여주게 된다. 미디어의 발전에 따라 껍질을 두르고 자유롭게 교감하는 것처럼 보이지만, 진짜 자아를 숨겨버린 사람들의 내면을 미디어셀이라는 이름의 가공의 생명체로 형상화하였다.
+					</p>
+					<p class="description_en">
+						As media develops, people are able to communicate with each other through physical barriers, but the reality shows an extremely divided self that has no choice but to interact superficially. With the development of the media, it seems to be surrounded and freely communicated, but the inner sides of people who hid their real selves are embodied as processed creatures named MediaCell.
+					</p>
+					<div style="text-align: right;">
+						<div class="nextButton" style="margin:30px 20px 0px 0px"></div>
+					</div>
+				</div>
+			</div>
+		</div>
+		<div id="scene2">
+			<div class="horizWrapper">
+				<div class="textWrapper_short desc_in_main">
+					<p class="smallTitle">II</p>
+					<p class="title">Relationships</p>
+					<p class="description_ko">
+						미디어가 발전하면 발전할수록, 사람들은 물리적인 장벽을 뚫고 서로와 교감할 수 있게 되었지만, 그 실체는 피상적으로 교류할 수밖에 없는, 극심한 분단된 자아를 보여주게 된다. 미디어의 발전에 따라 껍질을 두르고 자유롭게 교감하는 것처럼 보이지만, 진짜 자아를 숨겨버린 사람들의 내면을 미디어셀이라는 이름의 가공의 생명체로 형상화하였다.
+					</p>
+					<p class="description_en">
+						As media develops, people are able to communicate with each other through physical barriers, but the reality shows an extremely divided self that has no choice but to interact superficially. With the development of the media, it seems to be surrounded and freely communicated, but the inner sides of people who hid their real selves are embodied as processed creatures named MediaCell.
+					</p>
+					<div style="text-align: right;">
+						<div class="nextButton" style="margin:30px 20px 0px 0px"></div>
+					</div>
+				</div>
+				<div class="canvasWrapper">
+					<div id="canvas2"></div>
+				</div>
+			</div>
+		</div>
+		<div id="scene3">
+			<div id="canvas3"></div>
+			<div class="textWrapper_large desc_in_main">
+				<p class="smallTitle">III</p>
+				<p class="title">World</p>
+				<p class="description_ko">
+					교수님 살려주세요
+				</p>
+				<p class="description_en">
+					Help me Professor!
+				</p>
+			</div>
+		</div>
+	</main>
+	<nav>
+		<div>
+			<div id="navBarIcons">
+				<div id="scene1_ico" class="navButton aciveIco"></div>
+				<div id="scene2_ico" class="navButton"></div>
+				<div id="scene3_ico" class="navButton"></div>
+			</div>
+			<div id="navBar">
+				<div id="navBar_cursor"></div>
+			</div>
+		</div>
+	</nav>
+	<div id="overlay">
+		<div id="overlayDesc1" class="descOverlay container"></div>
+		<div id="overlayDesc2" class="descOverlay container"></div>
+		<div id="overlayDesc3" class="descOverlay container"></div>
+	</div>
+	<div id="cursor"></div>
+	<script type="text/javascript" src="js/main.js"></script>
+	<script type="module" src="js/canvas.js"></script>
+</body>
+</html>
