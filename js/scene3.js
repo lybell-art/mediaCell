@@ -45,7 +45,7 @@ function init()
 
 	// EVENTS
 	container.addEventListener( 'mousedown', onMousePressed );
-	container.addEventListener( 'mousemove', onMouseMoved , false);
+	document.addEventListener( 'mousemove', onMouseMoved , false);
 	window.addEventListener( 'mouseup', onMouseReleased );
 	window.addEventListener( 'resize', onWindowResize );
 }
@@ -79,6 +79,7 @@ function onMousePressed(e) {
 }
 function onMouseMoved(e)
 {
+	if(current_scene != 3) return;
 	mouse.x = e.clientX - window.innerWidth /2;
 	mouse.y = -(e.clientY - window.innerHeight/2);
 	if(isMousePressed)
