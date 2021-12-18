@@ -11,8 +11,10 @@ p{
 
 .title{
 	font-size: 36px;
-	margin-bottom: 40px;
 	text-align: center;
+	width: fit-content;
+	margin: 0px auto 40px auto;
+	pointer-events: bounding-box;
 }
 
 .smallTitle{
@@ -103,8 +105,9 @@ main>div
 
 .textWrapper_large{
 	position: absolute;
-    bottom: 100px;
-    width: 90vw;
+	bottom: 100px;
+	width: 90vw;
+	pointer-events: none;
 }
 
 .textWrapper_large .title{
@@ -291,14 +294,14 @@ nav>div{
 
 #navBar{
 	width: 100%;
-    height: 20px;
-    background-color: black;
-    border-radius: 18px 18px 0px 0px;
-    margin: 0px auto;
-    transition: background-color 0.2s linear;
+	height: 20px;
+	background-color: black;
+	border-radius: 18px 18px 0px 0px;
+	margin: 0px auto;
+	transition: background-color 0.2s linear;
 }
 .black #navBar{
-    background-color: white;
+	background-color: white;
 }
 #navBar_cursor{
 	width: 0;
@@ -313,6 +316,52 @@ nav>div{
 	border-color: transparent transparent white transparent;
 }
 
+/*Mute Button*/
+
+#muteButton{
+	position: absolute;
+	right: 0px;
+	width: 100px;
+	height: 26px;
+	padding: 5px;
+	cursor: pointer;
+	display: flex;
+	flex-direction: row;
+	justify-content: center;
+}
+
+#muteIcon{
+	width: 24px;
+	height: 24px;
+	display: flex;
+	justify-content: center;
+	align-items: center;
+}
+
+#muteIcon::before{
+	content: " ";
+	width: 20px;
+	height: 20px;
+	border-radius: 20px;
+	border: solid 2px;
+	transition: border-radius 0.5s, width 0.5s, transform 0.5s 0.5s;
+}
+
+#muteTxt{
+	display: inline-block;
+	width: 70px;
+	margin: 0px;
+	text-align: center;
+}
+
+#muteButton.muted #muteIcon::before{
+	border-radius: 5px/ 10px;
+	transform: rotate(270deg);
+	width: 4px;
+}
+
+/*cursor*/
+
 #cursor{
 	--cursorHue : 15;
 	--cursorHue2 : 15;
@@ -320,15 +369,15 @@ nav>div{
 	z-index: 200;
 	top: -20px;
 	left: -20px;
-  position: fixed;
-  width: 15px;
-  height: 15px;
-  border-radius: 7.5px;
-  background-color: hsl(var(--cursorHue),100%,75%);
-  color: hsla(var(--cursorHue),100%,75%,0.4);
-  pointer-events: none;
-  box-shadow: 0px 0px 10px 0px, 0px 0px 0px 12px;
-  transition: background-color 0.7s ease-in-out;
+	position: fixed;
+	width: 15px;
+	height: 15px;
+	border-radius: 7.5px;
+	background-color: hsl(var(--cursorHue),100%,75%);
+	color: hsla(var(--cursorHue),100%,75%,0.4);
+	pointer-events: none;
+	box-shadow: 0px 0px 10px 0px, 0px 0px 0px 12px;
+	transition: background-color 0.7s ease-in-out;
 }
 #cursor.clicked{
 	animation: cursorClick 0.7s ease-in-out 1;
@@ -349,6 +398,9 @@ nav>div{
 @media (max-width: 720px) {
 	.textWrapper,.textWrapper_short{
 		width: 90vw;
+	}
+	.desc_in_main .title{
+		margin: 0px auto 0px auto;
 	}
 	.canvasWrapper{
 		width: 100vw;

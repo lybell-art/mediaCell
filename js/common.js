@@ -47,6 +47,11 @@ function crossVector(a, b)
 	return v;
 }
 
+function clamp(num, min, max)
+{
+	return Math.min(Math.max(num, min), max);
+}
+
 function getScreenPos(cam, pos)
 {
 	let camPos=cam.position.clone();
@@ -96,4 +101,4 @@ function getMouseSphereLocation(camera, mousePos, radius)
 	}
 }
 
-export {isCanvasOffscreen, renderScene, getMousePosition, getScreenPos, getMouseSphereLocation};
+export {isCanvasOffscreen, renderScene, getMousePosition, getScreenPos, getMouseSphereLocation, clamp};

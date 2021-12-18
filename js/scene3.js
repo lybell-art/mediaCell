@@ -1,10 +1,10 @@
 import * as THREE from './libs/three.module.js';
-import {isCanvasOffscreen, renderScene, getMousePosition} from './common.js';
+import {isCanvasOffscreen, renderScene, getMousePosition, clamp} from './common.js';
 import {MediaCellBlobs_World as MediaCells} from './object.js';
 
 const container=document.getElementById("canvas3");
 const scene=new THREE.Scene();
-const camera=new THREE.PerspectiveCamera( 60, window.innerWidth / window.innerHeight, 1, 2000 );
+const camera=new THREE.PerspectiveCamera( 60, window.innerWidth / window.innerHeight, 0.1, 2000 );
 
 const raycaster = new THREE.Raycaster();
 const mouse = new THREE.Vector2();
@@ -75,7 +75,13 @@ function onWindowResize() {
 function onMousePressed(e) {
 	isMousePressed=true;
 	pickedCell=mediaCell.pick(camera, mouse);
-	if(pickedCell != null) pickedCell.obj.lock();
+	if(pickedCell != null)
+	{
+		pickedCell.obj.lock();
+		let newColor=new THREE.Color();
+		newColor.setHSL(myHue/360.0, 1.0, 0.75 );
+		pickedCell.obj.changeColor(newColor);
+	}
 }
 function onMouseMoved(e)
 {
@@ -86,7 +92,7 @@ function onMouseMoved(e)
 	{
 		if(pickedCell == null)
 		{
-			camera.rotation.x += e.movementY/500;
+			camera.rotation.x = clamp(camera.rotation.x += e.movementY/500, -Math.PI/2, Math.PI/2);
 			camera.rotation.y += e.movementX/500;
 		}
 		else

@@ -2,7 +2,9 @@ let current_scene=0;
 let level=0;
 const cursorDiv = document.getElementById('cursor');
 let myHue=15;
-
+let masterChannel = new Tone.Channel(1.0, 0.0).toDestination();
+let bubbleSampler, sound, distortSampler;
+let muted=false;
 
 function setButtonFunc()
 {
@@ -19,6 +21,7 @@ function setButtonFunc()
 	const main=document.getElementsByTagName("main")[0];
 	const nav=document.getElementsByTagName("nav")[0];
 	const navCur=document.getElementById("navBar_cursor");
+	const muteButton=document.getElementById("muteButton");
 	const generateButtonFunc=function(to){
 		return function()
 		{
@@ -53,6 +56,9 @@ function setButtonFunc()
 		for(let i=0;i<buttons.length;i++)
 		{
 			buttons[i].addEventListener('click', generateButtonFunc(sceneNo));
+			if(name == "intro") buttons[i].addEventListener('click', function(){
+				bubbleSampler.triggerAttackRelease(["C1"], 0.5);
+				Tone.start();});
 		}
 		sceneNo++;
 	}
@@ -68,6 +74,8 @@ function setButtonFunc()
 			buttons[i].addEventListener('click', generateButtonFunc( (sceneNo+1)%4 ) );
 		}
 	}
+
+	muteButton.addEventListener('click', toggleMute);
 }
 
 function cloneDesc(scene, overlay)
@@ -159,9 +167,129 @@ function scrollBG(e)
 	else if(prevLevel > 0.5 && level <= 0.5) document.body.classList.remove("black");
 }
 
+function makeBGNoise(freq, volume=0)
+{
+	const noise = new Tone.Noise("pink").start();
+	const filter = new Tone.Filter({gain:12, frequency:50, type:"lowpass", Q:10}).connect(masterChannel);
+	const filter2 = new Tone.Filter({gain:40, frequency:freq, type:"bandpass", Q:90}).connect(masterChannel);
+
+	noise.connect(filter);
+	noise.connect(filter2);
+//	noise.connect(masterChannel);
+	noise.volume.value = volume;
+}
+
+function makeBGAmbient(freq, volume=0)
+{
+	const ambient = new Tone.Oscillator({
+			"frequency":freq,
+			"partialCount": 3,
+			"partials": [
+				1,
+				0.005,
+				1
+			],
+			"phase": 90,
+			"type":"sine"
+		}).start();
+	ambient.connect(masterChannel);
+	ambient.volume.value = volume;
+}
+
+function makeSFX()
+{
+	bubbleSampler = new Tone.Sampler({
+	urls: {
+		C1: "assets/bubble.wav",
+	}
+	});
+	bubbleSampler.volume.value = -5;
+	bubbleSampler.connect(masterChannel);
+
+	const limiter = new Tone.Limiter(-5);
+	limiter.connect(masterChannel);
+
+    const masterDelay = new Tone.PingPongDelay(0.25);
+    masterDelay.wet = 0.3;
+    masterDelay.connect(limiter);
+
+    sound = new Tone.Synth({
+		"volume": -10,
+		"detune": 0,
+		"portamento": 0.02,
+		"envelope": {
+			"attack": 0.05,
+			"attackCurve": "exponential",
+			"decay": 0.01,
+			"decayCurve": "exponential",
+			"release": 2,
+			"releaseCurve": "exponential",
+			"sustain": 0.5
+		},
+		"oscillator": {
+			"partialCount": 3,
+			"partials": [
+				1,
+				0.005,
+				1
+			],
+			"phase": 90,
+			"type":"sine"
+		}
+	});
+
+	sound.connect(masterDelay);
+}
+
+function makeBGM()
+{
+	makeBGNoise(100, 0);
+	makeBGNoise(540, -6);
+	makeBGNoise(720, -12);
+//	makeBGAmbient(180, -24);
+	distortSampler = new Tone.Filter({gain:12, frequency:30000, type:"highpass", Q:10});
+	distortSampler.connect(masterChannel);
+}
+
+function playSFX(hue)
+{
+	let hue2 = Math.floor(hue/15)-12;
+	let freq = Math.pow(2,((hue2)/12))*440;
+	sound.triggerAttackRelease(freq, 0.1);
+	bubbleSampler.triggerAttackRelease("C1", 1.0);
+	
+}
+
+function distortBGM(freq)
+{
+	distortSampler.frequency.value=freq;
+}
+
+function toggleMute()
+{
+	muted = !muted;
+	const muteButton=document.getElementById("muteButton");
+	const muteTxt=document.getElementById("muteTxt");
+	console.log(masterChannel.muted);
+	if(muted)
+	{
+		muteButton.classList.add("muted");
+		muteTxt.innerText="Unmute";
+		masterChannel.mute=true;
+		
+	}
+	else{
+		muteButton.classList.remove("muted");
+		muteTxt.innerText="Mute";
+		masterChannel.mute=false;
+	}
+}
+
 
 function initialize()
 {
+	makeBGM();
+	makeSFX();
 	setMobileDesc();
 	setButtonFunc();
 	document.addEventListener('wheel', scrollBG);

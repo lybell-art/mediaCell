@@ -207,6 +207,16 @@ function getProjAxis(vec)
 
 /* For Scene 3 */
 
+function getLattice(vec)
+{
+	let res=[[0,0,0],[0,0,0],[0,0,0]];
+	for(let i=0;i<3;i++)
+	{
+		for(let j=0;j<3;j++) res[i][j]=vec[i]*vec[j];
+	}
+	return res;
+}
+
 const textureCube=new THREE.CubeTextureLoader()
 	.setPath( 'assets/' )
 	.load( [
@@ -345,7 +355,7 @@ class MediaCellBlobs
 		this.cells=[];
 		this.hull=new THREE.Group();
 
-		this.blob = new MarchingCubes( 70, BLOB_MATERIAL, true, true, 100000  );
+		this.blob = new MarchingCubes( 56, BLOB_MATERIAL, true, true, 100000  );
 		this.blob.position.set(0,0,0);
 		this.blob.scale.multiplyScalar( this.boundary );
 		this.blob.isolation = 160;
@@ -400,10 +410,13 @@ class MediaCellBlobs
 		let vvecs=[];
 		for(let i=0;i<this.cell_amount;i++)
 		{
-			let xi=math.subtract(this.cells[i].posArr, mean);
+			let pos=this.cells[i].posArr;
+			let xi=[ pos[0]-mean[0], pos[1]-mean[1], pos[2]-mean[2] ]; //direct calculation is faster than using math.sub()
 			vvecs.push(xi);
 
-			covariance=math.add( covariance, math.multiply( math.transpose([xi]) , [xi] ) );
+//			let lattice = math.multiply( math.transpose([xi]) , [xi] );
+			let lattice=getLattice(xi);
+			covariance=math.add( covariance, lattice );
 		}
 		covariance = math.divide(covariance, this.cell_amount);
 
@@ -431,7 +444,6 @@ class MediaCellBlobs
 	}
 	cellSort()
 	{
-		this.PCA();
 		this.cells.sort(function (a, b) {
 			if(a.alive && !b.alive) return -1;
 			else if(b.alive && !a.alive) return 1;
@@ -440,13 +452,14 @@ class MediaCellBlobs
 	}
 	repulsion(level=1)
 	{
-		const maxDist=160*level;
-		const surfaceDist = (30 + 30 * level);
+//		const maxDist=160*level;
+//		const surfaceDist = (30 + 30 * level) * myCell.power;
 		for(let i=0;i<this.active_cell_amount;i++)
 		{
 			let myCell=this.cells[i];
 			let repulsiveVector=new THREE.Vector3(0,0,0);
 
+			const maxDist=160*level * myCell.power;
 			const surfaceDist = (30 + 30 * level) * myCell.power;
 
 			for(let buho=-1;buho<2;buho+=2)
@@ -484,10 +497,9 @@ class MediaCellBlobs
 
 		this.blob.reset();
 		for ( let i = 0; i < this.active_cell_amount; i ++ ) {
-			const ballx = this.cells[i].position.x / (this.boundary*2) + 0.5;
 			const bally = this.cells[i].position.y / (this.boundary*2) + 0.5;
 			const ballz = this.cells[i].position.z / (this.boundary*2) + 0.5;
-
+			const ballx = this.cells[i].position.x / (this.boundary*2) + 0.5;
 			this.blob.addBall( ballx, bally, ballz, strength * this.cells[i].power, subtract );
 
 		}
@@ -594,7 +606,7 @@ class MediaCellBlobs_World extends MediaCellBlobs
 		let ray=raycaster.ray;
 		let axisZ=new THREE.Vector3();
 		camera.getWorldDirection ( axisZ );
-		const radius = 30 + 30 * this.level;
+		const radius = 60 + 60 * this.level;
 
 		for (let i=0;i<this.cell_amount;i++) {
 			const ball=this.cells[i];
@@ -624,7 +636,7 @@ class MediaCellBlobs_World extends MediaCellBlobs
 	}
 	updateBlobs(level=1)
 	{
-		super.updateBlobs(level, 1.5);
+		super.updateBlobs(level, 3);
 	}
 	drag(cell, camera, mouse)
 	{

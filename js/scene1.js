@@ -72,17 +72,14 @@ function onMouseMove( e ) {
 	let mousePos=getMousePosition(e.clientX, e.clientY, container);
 	mouse.set(mousePos.x, mousePos.y);
 
-	if(isMousePressed)
-	{
-		nudge(4);
-	}
+	if(isMousePressed) nudge(4);
 }
 
 function onMousePressed(e) {
 	isMousePressed=true;
 	let mousePos=getMousePosition(e.clientX, e.clientY, container);
 	mouse.set(mousePos.x, mousePos.y);
-	nudge(12);
+	if(nudge(12)) playSFX(myHue);
 }
 function onMouseReleased(e) {
 	isMousePressed=false;
@@ -92,7 +89,12 @@ function nudge(force)
 {
 	raycaster.setFromCamera( mouse, camera );
 	const intersect = raycaster.intersectObject( mediaCell.membrane);
-	if(intersect.length>0) mediaCell.press(intersect[0].face, intersect[0].point, force, myHue);
+	if(intersect.length>0)
+	{
+		mediaCell.press(intersect[0].face, intersect[0].point, force, myHue);
+		return true;
+	}
+	return false;
 }
 
 export {init, render};
