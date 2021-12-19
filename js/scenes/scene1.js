@@ -1,5 +1,7 @@
-import * as THREE from './libs/three.module.js';
-import {isCanvasOffscreen, renderScene, getMousePosition} from './common.js';
+import * as THREE from '../libs/three.module.js';
+import {Globals} from '../global.js';
+import {playSFX} from '../sound.js';
+import {isCanvasOffscreen, renderScene, getMousePosition} from '../common.js';
 import {MediaCellSingle} from './object.js';
 
 const container=document.getElementById("canvas1");
@@ -40,7 +42,7 @@ function debugSphere()
 function init()
 {
 	camera.position.set( 0, 0, 300 );
-	scene.background=new THREE.Color(BGColor());
+	scene.background=new THREE.Color(Globals.BGColor());
 	initLight();
 //	debugSphere();
 
@@ -54,9 +56,9 @@ function init()
 
 function animate(delta)
 {
-	let bright=(1-level);
+	let bright=(1-Globals.LEVEL());
 	scene.background.setRGB(bright,bright,bright);
-	mediaCell.update(level, delta);
+	mediaCell.update(Globals.LEVEL(), delta);
 }
 
 function render(renderer, delta)
@@ -67,7 +69,7 @@ function render(renderer, delta)
 }
 
 function onMouseMove( e ) {
-	if(current_scene != 1) return;
+	if(Globals.CURRENT_SCENE() != 1) return;
 
 	let mousePos=getMousePosition(e.clientX, e.clientY, container);
 	mouse.set(mousePos.x, mousePos.y);
@@ -79,7 +81,7 @@ function onMousePressed(e) {
 	isMousePressed=true;
 	let mousePos=getMousePosition(e.clientX, e.clientY, container);
 	mouse.set(mousePos.x, mousePos.y);
-	if(nudge(12)) playSFX(myHue);
+	if(nudge(12)) playSFX(Globals.HUE(), true);
 }
 function onMouseReleased(e) {
 	isMousePressed=false;
@@ -91,7 +93,7 @@ function nudge(force)
 	const intersect = raycaster.intersectObject( mediaCell.membrane);
 	if(intersect.length>0)
 	{
-		mediaCell.press(intersect[0].face, intersect[0].point, force, myHue);
+		mediaCell.press(intersect[0].face, intersect[0].point, force, Globals.HUE());
 		return true;
 	}
 	return false;

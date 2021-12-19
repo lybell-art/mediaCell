@@ -1,5 +1,7 @@
-import * as THREE from './libs/three.module.js';
-import {isCanvasOffscreen, renderScene, getMousePosition, clamp} from './common.js';
+import * as THREE from '../libs/three.module.js';
+import {Globals} from '../global.js';
+import {getPeak, distortBGM} from '../sound.js';
+import {isCanvasOffscreen, renderScene, getMousePosition, clamp} from '../common.js';
 import {MediaCellBlobs_World as MediaCells} from './object.js';
 
 const container=document.getElementById("canvas3");
@@ -12,6 +14,10 @@ const mouse = new THREE.Vector2();
 let mediaCell=null;
 let pickedCell=null;
 let isMousePressed=false;
+
+//for mobile
+const hammertime = new Hammer(container);
+hammertime.get('pan').set({ direction: Hammer.DIRECTION_ALL });
 
 function initLight()
 {
@@ -29,12 +35,33 @@ function initLight()
 	scene.add( ambientLight );
 }
 
+function initEventListeners()
+{
+	// EVENTS
+	container.addEventListener( 'mousedown', onMousePressed );
+	document.addEventListener( 'mousemove', onMouseMoved , false);
+	window.addEventListener( 'mouseup', onMouseReleased );
+	window.addEventListener( 'resize', onWindowResize );
+	if(Globals.IS_MOBILE)
+	{
+		hammertime.on('panstart', function(e){
+			mouse.x = e.center.x- window.innerWidth /2;
+			mouse.y = -(e.center.y - window.innerHeight/2);
+			onMousePressed(null);
+		});
+		hammertime.on('panmove', function(e){
+			onDragged(e.center.x, e.center.y, e.velocityY/20, e.velocityX/20);
+		});
+		hammertime.on('panend', onMouseReleased);
+	}
+}
+
 function init()
 {
 	camera.position.set( 0, 0, 0 );
 	camera.rotation.order = 'YXZ';
 
-	const bgCol = new THREE.Color(BGColor());
+	const bgCol = new THREE.Color(Globals.BGColor());
 	scene.background=bgCol;
 	scene.fog = new THREE.Fog(bgCol, 900, 1200);
 
@@ -43,20 +70,17 @@ function init()
 	mediaCell=new MediaCells();
 	mediaCell.addScene(scene);
 
-	// EVENTS
-	container.addEventListener( 'mousedown', onMousePressed );
-	document.addEventListener( 'mousemove', onMouseMoved , false);
-	window.addEventListener( 'mouseup', onMouseReleased );
-	window.addEventListener( 'resize', onWindowResize );
+	initEventListeners();
 }
 
 function animate(delta)
 {
-	let bright=(1-level);
+	let bright=(1-Globals.LEVEL());
 	scene.background.setRGB(bright,bright,bright);
 	scene.fog.color.setRGB(bright,bright,bright);
 
-	mediaCell.update(level, delta);
+	let amp=getPeak()*(1- 0.5*Globals.LEVEL()) + 1;
+	mediaCell.update(Globals.LEVEL(), delta, amp);
 }
 
 function render(renderer, delta)
@@ -73,31 +97,39 @@ function onWindowResize() {
 }
 
 function onMousePressed(e) {
+	if(Globals.CURRENT_SCENE() != 3) return;
+
 	isMousePressed=true;
 	pickedCell=mediaCell.pick(camera, mouse);
 	if(pickedCell != null)
 	{
 		pickedCell.obj.lock();
 		let newColor=new THREE.Color();
-		newColor.setHSL(myHue/360.0, 1.0, 0.75 );
+		newColor.setHSL(Globals.HUE()/360.0, 1.0, 0.75 );
 		pickedCell.obj.changeColor(newColor);
+		distortBGM(600+mouse.x);
 	}
 }
 function onMouseMoved(e)
 {
-	if(current_scene != 3) return;
-	mouse.x = e.clientX - window.innerWidth /2;
-	mouse.y = -(e.clientY - window.innerHeight/2);
+	onDragged(e.clientX, e.clientY, e.movementY/500, e.movementX/500);
+}
+function onDragged(xPos, yPos, xDelta, yDelta)
+{
+	if(Globals.CURRENT_SCENE() != 3) return;
+	mouse.x = xPos- window.innerWidth /2;
+	mouse.y = -(yPos - window.innerHeight/2);
 	if(isMousePressed)
 	{
 		if(pickedCell == null)
 		{
-			camera.rotation.x = clamp(camera.rotation.x += e.movementY/500, -Math.PI/2, Math.PI/2);
-			camera.rotation.y += e.movementX/500;
+			camera.rotation.x = clamp(camera.rotation.x += xDelta, -Math.PI/2, Math.PI/2);
+			camera.rotation.y += yDelta;
 		}
 		else
 		{
 			mediaCell.drag(pickedCell, camera, mouse, pickedCell.mouseDist);
+			distortBGM(600+xPos);
 		}
 	}
 }
@@ -108,6 +140,7 @@ function onMouseReleased(e) {
 		pickedCell.obj.unlock();
 		pickedCell=null;
 	}
+	distortBGM(30000);
 }
 
 export {init, render};

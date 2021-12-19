@@ -1,5 +1,7 @@
-import * as THREE from './libs/three.module.js';
-import {isCanvasOffscreen, renderScene, getMousePosition} from './common.js';
+import * as THREE from '../libs/three.module.js';
+import {Globals} from '../global.js';
+import {playSFX} from '../sound.js';
+import {isCanvasOffscreen, renderScene, getMousePosition} from '../common.js';
 import {MediaCellBlobs_Centre as MediaCells} from './object.js';
 
 const container=document.getElementById("canvas2");
@@ -31,7 +33,7 @@ function initLight()
 function init()
 {
 	camera.position.set( 0, 0, 1000 );
-	scene.background=new THREE.Color(BGColor());
+	scene.background=new THREE.Color(Globals.BGColor());
 	initLight();
 
 	mediaCell=new MediaCells();
@@ -43,9 +45,9 @@ function init()
 
 function animate(delta)
 {
-	let bright=(1-level);
+	let bright=(1-Globals.LEVEL());
 	scene.background.setRGB(bright,bright,bright);
-	mediaCell.update(level, delta);
+	mediaCell.update(Globals.LEVEL(), delta);
 }
 
 function render(renderer, delta)
@@ -70,7 +72,7 @@ function onMousePressed(e) {
 		matrix.invert();
 		newPoint.applyMatrix4(matrix);
 
-		mediaCell.shoot(intersect[0].face.normal, intersect[0].point, myHue);
+		mediaCell.shoot(intersect[0].face.normal, intersect[0].point, Globals.HUE());
 	}
 
 }

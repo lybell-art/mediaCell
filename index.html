@@ -8,6 +8,7 @@
 	</style>
 	<link href="https://fonts.googleapis.com/css?family=Noto+Serif+KR&display=swap" rel="stylesheet">
 	<link rel="stylesheet" type="text/css" href="css/style.css">
+	<script type="text/javascript" src="https://hammerjs.github.io/dist/hammer.min.js"></script>
 	<script src="https://cdnjs.cloudflare.com/ajax/libs/mathjs/10.0.0/math.min.js"></script>
 	<script type="text/javascript" src="js/libs/tone.js"></script>
 	<link rel="shortcut icon" href="#">
@@ -88,10 +89,12 @@
 				<p class="smallTitle">III</p>
 				<p class="title">World</p>
 				<p class="description_ko">
-					미디어셀들은 세상을 자유롭게 떠다니며, 다른 미디어셀과 만난다. 하지만, 그들의 핵이 만날 일은 결코 없다...
+					미디어셀들은 세상을 자유롭게 떠다니며, 다른 미디어셀과 만난다. 그 과정에서 그들은 군체를 형성하지만, 서로의 핵을 강하게 밀어낸다.<br/>
+					우리는 '미디어셀'이다. 이어져 있지만 분리된 세계에서, 우리는 진정한 핵의 교류를 할 수 있을까?
 				</p>
 				<p class="description_en">
-					MediaCells float freely around the world and meet each other. However, their nuclei will never meet...
+					MediaCells float freely around the world and meet each other. They form a big colony, but strongly push each other's nuclei.<br/>
+					We are the "MediaCell". In a connected but separate world, can we have a real communication?
 				</p>
 			</div>
 		</div>
@@ -102,6 +105,12 @@
 			<p id="muteTxt">Mute</p>
 		</div>
 	</header>
+	<div id="sideBar">
+		<input type="range" min="0" max="1" step="0.0078125" value="0" class="slider" id="levelSlider">
+		<output id="levelArrow" class="rangeArrow">
+			<div id="levelBubble"></div>
+		</output>
+	</div>
 	<nav>
 		<div>
 			<div id="navBarIcons">
@@ -120,7 +129,6 @@
 		<div id="overlayDesc3" class="descOverlay container"></div>
 	</div>
 	<div id="cursor"></div>
-	<script type="text/javascript" src="js/main.js"></script>
-	<script type="module" src="js/canvas.js"></script>
+	<script type="module" src="js/main.js"></script>
 </body>
 </html>

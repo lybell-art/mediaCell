@@ -1,4 +1,4 @@
-import * as THREE from './libs/three.module.js';
+import * as THREE from '../libs/three.module.js';
 import * as SCENE1 from './scene1.js';
 import * as SCENE2 from './scene2.js';
 import * as SCENE3 from './scene3.js';
@@ -42,6 +42,10 @@ function animate()
 	SCENE3.render(renderer, delta);
 }
 
+function start_canvas()
+{
+	init();
+	animate();
+}
 
-init();
-animate();
+export {start_canvas};

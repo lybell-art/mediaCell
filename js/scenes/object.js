@@ -1,7 +1,8 @@
-import * as THREE from './libs/three.module.js';
-import {mergeVertices} from './libs/plugins/BufferGeometryUtils.js';
-import { MarchingCubes } from './libs/plugins/MarchingCubes.js';
-import {getScreenPos, getMouseSphereLocation} from './common.js';
+import * as THREE from '../libs/three.module.js';
+import {mergeVertices} from '../libs/plugins/BufferGeometryUtils.js';
+import { MarchingCubes } from '../libs/plugins/MarchingCubes.js';
+import {getScreenPos, getMouseSphereLocation, subVector} from '../common.js';
+import {playSFX} from '../sound.js';
 
 const CELL_DELETE = 0;
 const CELL_PORTAL = 1;
@@ -37,12 +38,12 @@ class springVertex
 			let other = this.near[i].obj;
 			let l0 = this.near[i].length;
 
-			let dir = this.position.clone().sub(other.position);
+			let dir = subVector(this.position, other.position);
 			let dist = dir.length();
 			dir.normalize();
 
 			let F1 = dir.clone().multiplyScalar(-(dist - l0) * stiff);
-			let velDot = new THREE.Vector3().subVectors(this.velocity, other.velocity).dot(dir);
+			let velDot = subVector(this.velocity, other.velocity).dot(dir);
 			let F2 = dir.clone().multiplyScalar(-velDot * damper);
 
 			let F = new THREE.Vector3().addVectors(F1, F2).multiplyScalar(mass);
@@ -247,16 +248,21 @@ class MediaCell
 
 	constructor(pos, dir, power=1, alive=true, func=null)
 	{
+		this.hue=Math.random();
 		this.color = new THREE.Color();
-		this.color.setHSL( Math.random(), 1, Math.random() * 0.2 + 0.6 );
+		this.color.setHSL( this.hue, 1, Math.random() * 0.2 + 0.6 );
+		this.hue*=360;
+		
 		const material = new THREE.MeshBasicMaterial( { color: this.color, wireframe:true } );
 
 		this.mesh = new THREE.Mesh( MediaCell.geometry, material );
 //		this.mesh.layers.enable(1); //raycast
 
 		this.position = pos.clone();
+		this.prevPosition = pos.clone();
 		this.mesh.position.copy(this.position);
 		this.direction = dir.clone();
+
 		this.rd=0;
 		this.repulsion=new THREE.Vector3();
 
@@ -314,6 +320,10 @@ class MediaCell
 		this.repulsion.addScaledVector(force, 0.08);
 		this.mesh.position.add(this.repulsion);
 	}
+	prevUpdate()
+	{
+		this.prevPosition.copy(this.position);
+	}
 	lock()
 	{
 		this.locked=true;
@@ -342,6 +352,8 @@ class MediaCell
 	changeColor(color)
 	{
 		this.color.copy(color);
+		let hsl=color.getHSL({});
+		this.hue=hsl.h * 360;
 		this.mesh.material.color.copy(color);
 	}
 }
@@ -368,7 +380,7 @@ class MediaCellBlobs
 		for(let i=0;i<amount;i++)
 		{
 			let pos=new THREE.Vector3().randomDirection();
-			pos.multiplyScalar( (Math.random()*0.5 + 0.2) * this.boundary);
+			pos.multiplyScalar( (Math.random()*0.3 + 0.6) * this.boundary);
 			let dir=new THREE.Vector3().randomDirection();
 			dir.multiplyScalar(Math.random()*8 + 5);
 			this.addCell(pos, dir);
@@ -450,17 +462,15 @@ class MediaCellBlobs
 			return a.rd - b.rd;
 		});
 	}
-	repulsion(level=1)
+	repulsion(level=1, minSurface=30, maxSurface=60)
 	{
-//		const maxDist=160*level;
-//		const surfaceDist = (30 + 30 * level) * myCell.power;
 		for(let i=0;i<this.active_cell_amount;i++)
 		{
 			let myCell=this.cells[i];
 			let repulsiveVector=new THREE.Vector3(0,0,0);
 
 			const maxDist=160*level * myCell.power;
-			const surfaceDist = (30 + 30 * level) * myCell.power;
+			const surfaceDist = (minSurface + (maxSurface-minSurface) * level) * myCell.power;
 
 			for(let buho=-1;buho<2;buho+=2)
 			{
@@ -471,10 +481,14 @@ class MediaCellBlobs
 					if(j<0 || j>=this.active_cell_amount) break;
 
 					const targetCell=this.cells[j];
-					const targetPos=this.cells[j].position;
+					
+					const myPos=myCell.position.clone();
+					const myPrevPos=myCell.prevPosition.clone();
+					const targetPos=this.cells[j].position.clone();
+					const targetPrevPos=this.cells[j].prevPosition.clone();
 
-					let dist = myCell.position.distanceTo(targetPos);
-					let prevDist = myCell.position.distanceTo(targetPos.clone().sub(targetCell.direction));
+					let dist = myPos.distanceTo(targetPos);
+					let prevDist = myPrevPos.distanceTo( targetPrevPos );
 					if(dist < surfaceDist && prevDist > surfaceDist)
 					{
 						if(myCell.connection != null) myCell.connection(targetCell);
@@ -482,7 +496,7 @@ class MediaCellBlobs
 
 					if(dist > maxDist) continue;
 					let F=32*level/dist;
-					let force=myCell.position.clone().sub(targetPos);
+					let force=subVector(myPos, targetPos);
 					repulsiveVector.addScaledVector(force, F);
 				}
 			}
@@ -518,6 +532,7 @@ class MediaCellBlobs
 		this.repulsion(level);
 		this.updateBlobs(level);
 		this.level=level;
+		for(let i=0;i<this.cell_amount;i++) this.cells[i].prevUpdate();
 	}
 }
 
@@ -530,6 +545,7 @@ class MediaCellBlobs_Centre extends MediaCellBlobs
 
 		let originCell=new MediaCell(new THREE.Vector3(0,0,0), new THREE.Vector3(0,0,0), 2, true, function(e){
 			this.changeColor(e.color);
+			playSFX(e.hue);
 		});
 		originCell.changeColor( new THREE.Color().setHSL(0.5,0.4,0.9) );
 		this.cells.push(originCell);
@@ -592,6 +608,17 @@ class MediaCellBlobs_World extends MediaCellBlobs
 	constructor()
 	{
 		super(75, 1200, CELL_PORTAL);
+		this.amp=1.0;
+		for(let i=0;i<this.cell_amount;i++)
+		{
+			this.cells[i].connection=function(e)
+			{
+				if(this.locked)
+				{
+					playSFX(e.hue);
+				}
+			};
+		}
 	}
 	pick(camera, mouse)
 	{
@@ -616,7 +643,7 @@ class MediaCellBlobs_World extends MediaCellBlobs
 			if(dist > short.dist) continue;
 
 			//check overrapping
-			const pa=ball.position.clone().sub(ray.origin);
+			const pa=subVector(ball.position, ray.origin);
 			let forward = pa.dot(axisZ);
 			if(forward < 0) continue;
 			let crossVect=pa.cross(ray.direction);
@@ -627,16 +654,24 @@ class MediaCellBlobs_World extends MediaCellBlobs
 				let screenPos = getScreenPos(camera, ball.position);
 				short.obj = ball;
 				short.mouseDist = new THREE.Vector2(screenPos.x - mouse.x, screenPos.y - mouse.y);
-	//			console.log(screenPos, mouse);
 				short.dist = dist;
 			}
 		}
 		if(short.obj == null) return null;
 		return short;
 	}
+	repulsion(level=1)
+	{
+		super.repulsion(level*2, 180, 240);
+	}
 	updateBlobs(level=1)
 	{
-		super.updateBlobs(level, 3);
+		super.updateBlobs(level, 3*this.amp);
+	}
+	update(level, delta, amp)
+	{
+		this.amp=amp;
+		super.update(level, delta);
 	}
 	drag(cell, camera, mouse)
 	{

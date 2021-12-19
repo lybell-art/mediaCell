@@ -40,6 +40,13 @@ function getMousePosition(mouseX, mouseY, container)
 	return mouse;
 }
 
+function subVector(a, b)
+{
+	const v=new Vector3();
+	v.subVectors(a,b);
+	return v;
+}
+
 function crossVector(a, b)
 {
 	const v=new Vector3();
@@ -101,4 +108,4 @@ function getMouseSphereLocation(camera, mousePos, radius)
 	}
 }
 
-export {isCanvasOffscreen, renderScene, getMousePosition, getScreenPos, getMouseSphereLocation, clamp};
+export {isCanvasOffscreen, renderScene, getMousePosition, getScreenPos, getMouseSphereLocation, clamp, subVector};

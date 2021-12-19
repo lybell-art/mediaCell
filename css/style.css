@@ -323,11 +323,17 @@ nav>div{
 	right: 0px;
 	width: 100px;
 	height: 26px;
+	margin-top: 5px;
 	padding: 5px;
 	cursor: pointer;
-	display: flex;
+	display: none;
 	flex-direction: row;
 	justify-content: center;
+
+}
+
+#muteButton.is_open{
+	display: flex;
 }
 
 #muteIcon{
@@ -383,6 +389,120 @@ nav>div{
 	animation: cursorClick 0.7s ease-in-out 1;
 }
 
+/*slider(for mobile)*/
+
+#sideBar{
+	position: fixed;
+	z-index: 9;
+	right: 0px;
+	height: 100vh;
+	display: flex;
+	align-items: center;
+	justify-content: flex-end;
+	pointer-events: none;
+	transform: translateX(100px);
+	transition: 0.3s ease-out, width 0s, height 0s;
+}
+
+#sideBar.is_open{
+	transform: translateX(100px);
+}
+#sideBar.mobile.is_open{
+	transform: translateX(0px);
+}
+
+.slider{
+	position: absolute;
+	appearance: none;
+	transform: rotate(90deg) translate(0px, -130px);
+	background: #000000;
+	height: 20px;
+	width: 250px;
+	pointer-events: bounding-box;
+	border-radius: 0px 0px 15px 15px;
+	padding: 0px 15px;
+	margin: 0px;
+	transition: background 0.2s linear;
+}
+
+.black .slider{
+	background: #ffffff;
+}
+
+.slider::-webkit-slider-thumb {
+	-webkit-appearance: none;
+	appearance: none;
+	width: 20px;
+	height: 20px;
+	transform:translateY(45px);
+	border-radius:40px;
+	background: black;
+	cursor: pointer;
+	transition: background 0.2s linear;
+}
+
+.slider::-moz-slider-thumb {
+	-moz-appearance: none;
+	appearance: none;
+	width: 20px;
+	height: 20px;
+	transform:translateY(45px);
+	border-radius:40px;
+	background: black;
+	cursor: pointer;
+	transition: background 0.2s linear;
+}
+
+.black .slider::-webkit-slider-thumb{
+	background: white;
+}
+
+.black .slider::-moz-slider-thumb{
+	background: white;
+}
+
+.rangeArrow{
+	--value : 0px;
+
+	width: 40px;
+	height: 40px;
+	position: relative;
+	left: -33px;
+	top: -115px;
+}
+
+.rangeArrow #levelBubble{
+	box-sizing: border-box;
+	position: absolute;
+	width: 100%;
+	height: 100%;
+	top: 0px;
+	left: -2px;
+	transform: scale(0.5);
+	border: solid 2px;
+	border-radius: 40px;
+	background-color: none;
+	pointer-events: none;
+	transition: border 0.2s linear;
+}
+
+.rangeArrow::after{
+	content: " ";
+	position: absolute;
+	width: 0;
+	height: 0;
+	top: 12px;
+	right: -18px;
+	border-style: solid;
+	border-width: 8px 12px 8px 0px;
+	border-color: transparent black transparent transparent;
+	transition: border-color 0.2s linear;
+}
+
+.black .rangeArrow::after{
+	border-color: transparent white transparent transparent;
+}
+
 
 /*for mobile device */
 @media (max-width: 1200px) {
@@ -396,6 +516,9 @@ nav>div{
 }
 
 @media (max-width: 720px) {
+	#sideBar.is_open{
+		transform: translateX(0px);
+	}
 	.textWrapper,.textWrapper_short{
 		width: 90vw;
 	}
